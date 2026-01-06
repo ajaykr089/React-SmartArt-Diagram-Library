@@ -1,5 +1,5 @@
 import React from 'react';
-import { DiagramNode } from '../../types/diagram';
+import { DiagramNode, DiagramTheme } from '../../types/diagram';
 import {
   RectangleNode,
   CircleNode,
@@ -12,12 +12,13 @@ import {
   EllipseNode,
   ParallelogramNode,
   TrapezoidNode
-} from '../../components/nodes';
+} from '../nodes';
 
 interface NodeRendererProps {
   nodes: DiagramNode[];
   selectedNode: DiagramNode | null;
   editable: boolean;
+  theme?: DiagramTheme;
   onNodeClick: (node: DiagramNode, event: React.MouseEvent) => void;
   onNodeMouseDown: (node: DiagramNode, event: React.MouseEvent) => void;
 }

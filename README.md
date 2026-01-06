@@ -6,23 +6,62 @@
 [![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![npm version](https://img.shields.io/npm/v/react-smartart-diagram-library.svg)](https://www.npmjs.com/package/react-smartart-diagram-library)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/ajaykr089/React-SmartArt-Diagram-Library/ci.yml)](https://github.com/ajaykr089/React-SmartArt-Diagram-Library/actions)
 
-A powerful, open-source React component library for creating and editing professional diagram structures similar to Microsoft PowerPoint SmartArt. Built with TypeScript, SVG rendering, and modern React patterns.
+**Enterprise-grade diagramming solution** for React applications. Create professional diagrams with drag-and-drop editing, auto-layout algorithms, themes, keyboard shortcuts, and export capabilities. Built for corporate dashboards, LMS, AI tools, and modern web applications.
 
 ## ✨ Features
 
-- **🎨 Multiple Diagram Types**: Flowcharts, org charts, mind maps, tree structures, hierarchy charts, and more
-- **🔧 Node Editing**: Add, remove, resize, and customize nodes with different shapes (rectangle, circle, diamond, etc.)
-- **🎯 Drag & Drop**: Intuitive drag-and-drop functionality for nodes and edges
-- **📐 Auto Layout**: Intelligent layout algorithms with Dagre and ElkJS integration
-- **🎭 Themes & Styles**: Customizable themes and styling options
-- **⌨️ Keyboard Shortcuts**: Full keyboard navigation and shortcuts
-- **🔄 Undo/Redo**: Complete history management
-- **📤 Export Options**: Export to PNG, SVG, and JSON formats
-- **📥 Import Support**: Import diagrams from JSON
-- **📱 Responsive**: Mobile and desktop optimized
-- **⚡ Performance**: Virtual rendering for large diagrams
-- **🔒 TypeScript**: Full TypeScript support with comprehensive type definitions
+### 🎨 **Diagram Types & Visualization**
+- **12 Node Shapes**: Rectangle, Circle, Diamond, Triangle, Hexagon, Pentagon, Star, Rounded Rectangle, Ellipse, Parallelogram, Trapezoid, Custom shapes
+- **Multiple Diagram Types**: Flowcharts, Org Charts, Mind Maps, Tree Structures, Hierarchy Charts, Process Diagrams
+- **3 Rendering Engines**: SVG (default), Canvas, Virtual (for large diagrams)
+- **High-DPI Support**: Crisp rendering on all devices
+
+### 🔧 **Advanced Editing & Interaction**
+- **Node Operations**: Add, Remove, Resize, Drag & Drop, Shape changing, Text editing
+- **Edge Management**: Connect nodes, Edit labels, Custom styling, Arrowheads
+- **Context Menus**: Right-click context menus with submenus
+- **Keyboard Shortcuts**: Full keyboard navigation (Ctrl+Z/Y, Delete, Ctrl+N, etc.)
+- **Undo/Redo System**: Complete history management with customizable depth
+
+### 🎯 **Smart Layout & Auto-Organization**
+- **5 Layout Algorithms**: Force-directed, Circular, Tree, Grid, Organic layouts
+- **Auto-layout System**: Intelligent diagram organization with debouncing
+- **Layout Engines**: Dagre, ELK.js, and Custom physics-based layouts
+- **Responsive Layouts**: Horizontal/vertical orientations with spacing controls
+
+### 🎭 **Theming & Customization**
+- **3 Built-in Themes**: Light, Dark, Corporate
+- **Theme System**: CSS custom properties with localStorage persistence
+- **Custom Styling**: Node/edge colors, borders, fonts, animations
+- **Extensible Architecture**: Plugin system for custom themes
+
+### 📤 **Import/Export & Data Management**
+- **Multi-format Export**: JSON, XML, CSV formats
+- **Import Support**: JSON, XML, CSV with validation and error handling
+- **File Downloads**: Browser-native file download utilities
+- **Data Validation**: Comprehensive error checking and warnings
+
+### 🎣 **Advanced React Hooks**
+- **`useDiagram`**: Complete diagram state management
+- **`useNodes`**: Node filtering, selection, statistics
+- **`useEdges`**: Edge analysis, connectivity, relationships
+- **`useAutoLayout`**: Intelligent layout management
+- **`useKeyboard`**: Shortcut handling with SSR support
+
+### ⚡ **Performance & Optimization**
+- **Virtual Rendering**: Handle thousands of nodes efficiently
+- **Debounced Operations**: Optimized for smooth interactions
+- **Memory Management**: Proper cleanup and resource management
+- **SSR Compatible**: Server-side rendering support
+
+### 📱 **Responsive & Accessible**
+- **Mobile Optimized**: Touch gestures and responsive design
+- **Keyboard Accessible**: Full keyboard navigation support
+- **Screen Reader Support**: ARIA attributes and semantic markup
+- **Cross-browser**: Modern browser compatibility
 
 ## 🚀 Quick Start
 
@@ -68,6 +107,159 @@ const MyDiagram = () => {
 };
 
 export default MyDiagram;
+```
+
+### Advanced Usage with Hooks
+
+```tsx
+import React from 'react';
+import {
+  SmartDiagram,
+  useDiagram,
+  useAutoLayout,
+  useKeyboard,
+  createDiagramShortcuts
+} from 'react-smartart-diagram-library';
+
+const AdvancedDiagram = () => {
+  // Complete diagram state management
+  const diagram = useDiagram({
+    initialData: {
+      nodes: [],
+      edges: [],
+      layout: { type: 'flowchart', direction: 'horizontal' },
+      metadata: { title: 'Advanced Diagram' }
+    }
+  });
+
+  // Auto-layout management
+  const { data, triggerLayout } = useAutoLayout(diagram.data, {
+    triggerOnNodeAdd: true,
+    triggerOnNodeRemove: true,
+    debounceMs: 300
+  });
+
+  // Keyboard shortcuts
+  useKeyboard(createDiagramShortcuts({
+    onUndo: diagram.undo,
+    onRedo: diagram.redo,
+    onDelete: () => {
+      if (diagram.selectedNode) diagram.removeNode(diagram.selectedNode.id);
+    },
+    onNewNode: () => {
+      const id = diagram.addNode({
+        type: 'rectangle',
+        position: { x: Math.random() * 400, y: Math.random() * 300 },
+        size: { width: 120, height: 60 },
+        data: { label: 'New Node' }
+      });
+    }
+  }));
+
+  return (
+    <div>
+      <div className="toolbar">
+        <button onClick={() => diagram.undo()} disabled={!diagram.canUndo}>
+          Undo
+        </button>
+        <button onClick={() => diagram.redo()} disabled={!diagram.canRedo}>
+          Redo
+        </button>
+        <button onClick={() => triggerLayout('node-add')}>
+          Auto Layout
+        </button>
+      </div>
+
+      <SmartDiagram
+        data={data}
+        editable={true}
+        onChange={diagram.updateData}
+        onNodeSelect={diagram.selectNode}
+        width={800}
+        height={600}
+      />
+    </div>
+  );
+};
+```
+
+### Using Different Renderers
+
+```tsx
+import { CanvasRenderer, VirtualRenderer } from 'react-smartart-diagram-library';
+
+// For high-performance diagrams
+<CanvasRenderer
+  data={diagramData}
+  width={800}
+  height={600}
+  onNodeClick={(node) => console.log('Clicked:', node)}
+/>
+
+// For large diagrams with virtual scrolling
+<VirtualRenderer
+  data={largeDiagramData}
+  width={1200}
+  height={800}
+  viewport={{ x: 0, y: 0, zoom: 1 }}
+  onViewportChange={(viewport) => console.log('Viewport:', viewport)}
+/>
+```
+
+### Theming and Styling
+
+```tsx
+import { ThemeProvider, useTheme, corporateTheme } from 'react-smartart-diagram-library';
+
+const ThemedDiagram = () => {
+  const { theme, setTheme } = useTheme();
+
+  return (
+    <ThemeProvider theme={corporateTheme}>
+      <div>
+        <select value={theme} onChange={(e) => setTheme(e.target.value)}>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+          <option value="corporate">Corporate</option>
+        </select>
+
+        <SmartDiagram
+          data={diagramData}
+          editable={true}
+          onChange={setDiagramData}
+          width={800}
+          height={600}
+        />
+      </div>
+    </ThemeProvider>
+  );
+};
+```
+
+### Export and Import
+
+```tsx
+import { exportDiagram, importDiagram, downloadFile } from 'react-smartart-diagram-library';
+
+const handleExport = () => {
+  const result = exportDiagram(diagramData, { format: 'json' });
+  downloadFile(result);
+};
+
+const handleImport = async (file: File) => {
+  const text = await file.text();
+  const result = importDiagram(text, 'json');
+
+  if (result.errors.length > 0) {
+    console.error('Import errors:', result.errors);
+  }
+
+  if (result.warnings.length > 0) {
+    console.warn('Import warnings:', result.warnings);
+  }
+
+  setDiagramData(result.data);
+};
 ```
 
 ## 📚 Documentation
@@ -173,24 +365,124 @@ npm run storybook
 
 ```
 React-SmartArt-Diagram-Library/
-├── src/lib/
-│   ├── components/
-│   │   ├── SmartDiagram.tsx      # Main diagram component
-│   │   └── renderers/
-│   │       └── SVGRenderer.tsx   # SVG rendering engine
-│   ├── layouts/
-│   │   ├── engines/
-│   │   │   ├── dagre.ts         # Dagre layout engine
-│   │   │   └── elkjs.ts         # ELK layout engine
-│   │   └── LayoutManager.ts     # Layout management
-│   ├── themes/
-│   │   └── default.ts           # Default theme
-│   ├── types/
-│   │   └── diagram.ts           # TypeScript definitions
-│   └── index.ts                 # Library exports
-├── examples/                    # Example implementations
-├── docs/                        # Documentation
-└── package.json
+├── src/
+│   ├── lib/                          # Core library code
+│   │   ├── components/
+│   │   │   ├── SmartDiagram/         # Main diagram components
+│   │   │   │   ├── SmartDiagram.tsx  # Main diagram component
+│   │   │   │   ├── DiagramCanvas.tsx # Canvas rendering
+│   │   │   │   ├── NodeRenderer.tsx  # Node rendering logic
+│   │   │   │   ├── EdgeRenderer.tsx  # Edge rendering logic
+│   │   │   │   └── Toolbar.tsx       # Diagram toolbar
+│   │   │   ├── nodes/                # Node shape components
+│   │   │   │   ├── BaseNode.tsx      # Base node component
+│   │   │   │   ├── RectangleNode.tsx # Rectangle shape
+│   │   │   │   ├── CircleNode.tsx    # Circle shape
+│   │   │   │   ├── DiamondNode.tsx   # Diamond shape
+│   │   │   │   └── ... (10+ more shapes)
+│   │   │   ├── renderers/            # Rendering engines
+│   │   │   │   ├── SVGRenderer.tsx   # SVG rendering (default)
+│   │   │   │   ├── CanvasRenderer.tsx # Canvas rendering
+│   │   │   │   └── VirtualRenderer.tsx # Virtual scrolling
+│   │   │   └── controls/             # Interactive controls
+│   │   │       ├── DragHandle.tsx    # Drag functionality
+│   │   │       ├── ResizeHandle.tsx  # Resize functionality
+│   │   │       └── ContextMenu.tsx   # Context menus
+│   │   ├── layouts/                  # Layout system
+│   │   │   ├── engines/              # Layout algorithms
+│   │   │   │   ├── dagre.ts         # Dagre layout engine
+│   │   │   │   ├── elkjs.ts         # ELK.js layout engine
+│   │   │   │   └── custom.ts        # Custom physics layouts
+│   │   │   ├── LayoutManager.ts     # Layout coordination
+│   │   │   └── AutoLayout.ts        # Auto-layout system
+│   │   ├── themes/                  # Theming system
+│   │   │   ├── default.ts           # Light theme
+│   │   │   ├── dark.ts              # Dark theme
+│   │   │   ├── corporate.ts         # Corporate theme
+│   │   │   └── ThemeProvider.tsx    # Theme context
+│   │   ├── hooks/                   # React hooks
+│   │   │   ├── useDiagram.ts        # Diagram state management
+│   │   │   ├── useNodes.ts          # Node operations
+│   │   │   ├── useEdges.ts          # Edge operations
+│   │   │   ├── useUndoRedo.ts       # History management
+│   │   │   ├── useKeyboard.ts       # Keyboard shortcuts
+│   │   │   └── useAutoLayout.ts     # Auto-layout hook
+│   │   ├── utils/                   # Utility functions
+│   │   │   ├── geometry.ts          # Geometric calculations
+│   │   │   ├── animations.ts        # Animation utilities
+│   │   │   ├── performance.ts       # Performance optimizations
+│   │   │   ├── export.ts            # Export utilities
+│   │   │   └── import.ts            # Import utilities
+│   │   ├── types/                   # TypeScript definitions
+│   │   │   └── diagram.ts           # Core type definitions
+│   │   └── index.ts                 # Library exports
+│   └── pages/                       # Next.js pages
+│       ├── _app.js                  # App wrapper
+│       └── index.tsx                # Demo page
+├── styles/                          # Global styles
+│   └── diagram.css                  # Diagram-specific styles
+├── examples/                        # Example implementations
+├── docs/                            # Documentation
+├── package.json                     # Dependencies and scripts
+├── tsconfig.json                    # TypeScript configuration
+├── next.config.js                   # Next.js configuration
+└── README.md                        # This file
+```
+
+### Available Hooks
+
+```typescript
+// Complete diagram state management
+const diagram = useDiagram({
+  initialData: myDiagramData,
+  maxHistorySize: 50
+});
+
+// Node operations and filtering
+const nodes = useNodes({
+  nodes: diagram.nodes,
+  selectedIds: selectedNodeIds
+});
+
+// Edge analysis and relationships
+const edges = useEdges({
+  edges: diagram.edges,
+  nodes: diagram.nodes
+});
+
+// Auto-layout with debouncing
+const { data, triggerLayout } = useAutoLayout(diagramData, {
+  triggerOnNodeAdd: true,
+  debounceMs: 300
+});
+
+// Keyboard shortcuts
+useKeyboard(createDiagramShortcuts({
+  onUndo: diagram.undo,
+  onRedo: diagram.redo,
+  onDelete: () => diagram.removeNode(selectedNode.id)
+}));
+```
+
+### Available Components
+
+```tsx
+// Main diagram component
+<SmartDiagram data={data} editable={true} onChange={setData} />
+
+// Alternative renderers
+<CanvasRenderer data={data} width={800} height={600} />
+<VirtualRenderer data={largeData} width={1200} height={800} />
+
+// Theming
+<ThemeProvider theme={darkTheme}>
+  <SmartDiagram data={data} />
+</ThemeProvider>
+
+// Controls
+<DragHandle node={selectedNode} onDrag={handleDrag} />
+<ResizeHandle node={selectedNode} onResize={handleResize} />
+<ContextMenu x={x} y={y} items={menuItems} onClose={closeMenu} />
 ```
 
 ## 🤝 Contributing

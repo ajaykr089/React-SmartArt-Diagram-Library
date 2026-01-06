@@ -14,7 +14,7 @@ import {
   Input,
   Badge
 } from 'rsuite';
-import { SmartDiagram, SmartDiagramData, DiagramNode, DiagramEdge } from '../src/lib';
+import { SmartDiagram, SmartDiagramData, DiagramNode, DiagramEdge, ThemeSelector } from '../src/lib';
 import { ExportUtils } from '../src/lib/utils/exportUtils';
 
 const sampleData: SmartDiagramData = {
@@ -225,7 +225,8 @@ export default function Home() {
                     <p>Open-Source SmartArt for Modern Web Apps</p>
                   </div>
                 </Col>
-                <Col xs={8} style={{ textAlign: 'right' }}>
+                <Col xs={8} style={{ textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '12px' }}>
+                  <ThemeSelector />
                   <ButtonGroup>
                     <Button appearance="primary" onClick={loadSampleDiagram}>
                       Load Sample

@@ -1,5 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { SmartDiagramData, DiagramNode, DiagramEdge, Position } from '../../types/diagram';
+import { useTheme } from '../../themes/ThemeProvider';
+import { useKeyboard, createDiagramShortcuts } from '../../hooks/useKeyboard';
 import { NodeRenderer } from './NodeRenderer';
 import { EdgeRenderer } from './EdgeRenderer';
 
@@ -33,6 +35,86 @@ export const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
+
+  // Use theme hook
+  const { theme } = useTheme();
+
+  // Keyboard shortcuts
+  const keyboardShortcuts = createDiagramShortcuts({
+    delete: () => {
+      if (selectedNode) {
+        const updatedNodes = data.nodes.filter(node => node.id !== selectedNode.id);
+        const updatedEdges = data.edges.filter(edge =>
+          edge.source !== selectedNode.id && edge.target !== selectedNode.id
+        );
+        const newData = {
+          ...data,
+          nodes: updatedNodes,
+          edges: updatedEdges,
+          metadata: { ...data.metadata, updatedAt: new Date() }
+        };
+        onChange(newData);
+      } else if (selectedEdge) {
+        const updatedEdges = data.edges.filter(edge => edge.id !== selectedEdge.id);
+        const newData = {
+          ...data,
+          edges: updatedEdges,
+          metadata: { ...data.metadata, updatedAt: new Date() }
+        };
+        onChange(newData);
+      }
+    },
+    addNode: () => {
+      const newNode: DiagramNode = {
+        id: `node-${Date.now()}`,
+        type: 'rectangle',
+        position: {
+          x: Math.random() * 300 + 50,
+          y: Math.random() * 200 + 50
+        },
+        size: { width: 120, height: 60 },
+        data: {
+          label: `Node ${data.nodes.length + 1}`,
+          style: theme.node.default
+        }
+      };
+      const newData = {
+        ...data,
+        nodes: [...data.nodes, newNode],
+        metadata: { ...data.metadata, updatedAt: new Date() }
+      };
+      onChange(newData);
+    },
+    addEdge: () => {
+      if (!selectedNode || data.nodes.length < 2) return;
+      const availableTargets = data.nodes.filter(n => n.id !== selectedNode.id);
+      if (availableTargets.length === 0) return;
+      const randomTarget = availableTargets[Math.floor(Math.random() * availableTargets.length)];
+      const newEdge: DiagramEdge = {
+        id: `edge-${Date.now()}`,
+        source: selectedNode.id,
+        target: randomTarget.id,
+        type: 'straight',
+        data: {
+          label: 'Connection',
+          style: theme.edge.default
+        }
+      };
+      const newData = {
+        ...data,
+        edges: [...data.edges, newEdge],
+        metadata: { ...data.metadata, updatedAt: new Date() }
+      };
+      onChange(newData);
+    }
+  });
+
+  // Initialize keyboard shortcuts
+  useKeyboard({
+    enabled: editable,
+    shortcuts: keyboardShortcuts,
+    target: containerRef.current || undefined
+  });
 
   const handleNodeClick = useCallback((node: DiagramNode, event: React.MouseEvent) => {
     event.stopPropagation();
@@ -237,6 +319,7 @@ export const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
           nodes={data.nodes}
           selectedNode={selectedNode}
           editable={editable}
+          theme={theme}
           onNodeClick={handleNodeClick}
           onNodeMouseDown={handleNodeMouseDown}
         />

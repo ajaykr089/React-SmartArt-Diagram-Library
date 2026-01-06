@@ -119,6 +119,66 @@ export const defaultTheme: DiagramTheme = {
         padding: 8,
         shadow: false
       },
+      pentagon: {
+        backgroundColor: '#FFFFFF',
+        borderColor: '#D1D5DB',
+        borderWidth: 1,
+        borderRadius: 0,
+        textColor: '#111827',
+        fontSize: 14,
+        fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+        fontWeight: 'normal',
+        padding: 8,
+        shadow: false
+      },
+      star: {
+        backgroundColor: '#FFFFFF',
+        borderColor: '#D1D5DB',
+        borderWidth: 1,
+        borderRadius: 0,
+        textColor: '#111827',
+        fontSize: 14,
+        fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+        fontWeight: 'normal',
+        padding: 8,
+        shadow: false
+      },
+      ellipse: {
+        backgroundColor: '#FFFFFF',
+        borderColor: '#D1D5DB',
+        borderWidth: 1,
+        borderRadius: 50,
+        textColor: '#111827',
+        fontSize: 14,
+        fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+        fontWeight: 'normal',
+        padding: 8,
+        shadow: false
+      },
+      parallelogram: {
+        backgroundColor: '#FFFFFF',
+        borderColor: '#D1D5DB',
+        borderWidth: 1,
+        borderRadius: 0,
+        textColor: '#111827',
+        fontSize: 14,
+        fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+        fontWeight: 'normal',
+        padding: 8,
+        shadow: false
+      },
+      trapezoid: {
+        backgroundColor: '#FFFFFF',
+        borderColor: '#D1D5DB',
+        borderWidth: 1,
+        borderRadius: 0,
+        textColor: '#111827',
+        fontSize: 14,
+        fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+        fontWeight: 'normal',
+        padding: 8,
+        shadow: false
+      },
       custom: {
         backgroundColor: '#FFFFFF',
         borderColor: '#D1D5DB',
