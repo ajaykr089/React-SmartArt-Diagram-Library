@@ -1,3 +1,4 @@
+// Core diagram types
 export type DiagramType =
   | 'flowchart'
   | 'org-chart'
@@ -35,6 +36,7 @@ export type LayoutDirection =
   | 'left-right'
   | 'right-left';
 
+// Basic geometric types
 export interface Position {
   x: number;
   y: number;
@@ -45,6 +47,7 @@ export interface Size {
   height: number;
 }
 
+// Style types
 export interface NodeStyle {
   backgroundColor?: string;
   borderColor?: string;

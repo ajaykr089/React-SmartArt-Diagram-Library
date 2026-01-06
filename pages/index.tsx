@@ -247,83 +247,9 @@ export default function Home() {
                 <Col xs={24} md={16}>
                   <Panel
                     header={
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <h3 style={{ margin: 0 }}>Interactive Diagram Canvas</h3>
-                          <Badge content={`${diagramData.nodes.length} nodes, ${diagramData.edges.length} connections`} />
-                        </div>
-                        <ButtonGroup>
-                          <Button
-                            appearance="primary"
-                            size="sm"
-                            onClick={() => {
-                              const newNode: DiagramNode = {
-                                id: `node-${Date.now()}`,
-                                type: 'rectangle',
-                                position: {
-                                  x: Math.random() * 400 + 50,
-                                  y: Math.random() * 300 + 50
-                                },
-                                size: { width: 120, height: 60 },
-                                data: {
-                                  label: `Node ${diagramData.nodes.length + 1}`,
-                                  style: {
-                                    backgroundColor: '#10B981',
-                                    textColor: '#FFFFFF'
-                                  }
-                                }
-                              };
-
-                              const newData = {
-                                ...diagramData,
-                                nodes: [...diagramData.nodes, newNode]
-                              };
-
-                              handleDiagramChange(newData);
-                            }}
-                          >
-                            Add Node
-                          </Button>
-
-                          <Button
-                            appearance="primary"
-                            color="green"
-                            size="sm"
-                            disabled={!selectedNode || diagramData.nodes.length < 2}
-                            onClick={() => {
-                              if (!selectedNode) return;
-
-                              const availableTargets = diagramData.nodes.filter(n => n.id !== selectedNode.id);
-                              if (availableTargets.length === 0) return;
-
-                              const randomTarget = availableTargets[Math.floor(Math.random() * availableTargets.length)];
-
-                              const newEdge: DiagramEdge = {
-                                id: `edge-${Date.now()}`,
-                                source: selectedNode.id,
-                                target: randomTarget.id,
-                                type: 'straight',
-                                data: {
-                                  label: 'Connection',
-                                  style: {
-                                    strokeColor: '#6B7280',
-                                    strokeWidth: 2,
-                                    arrowhead: 'arrow'
-                                  }
-                                }
-                              };
-
-                              const newData = {
-                                ...diagramData,
-                                edges: [...diagramData.edges, newEdge]
-                              };
-
-                              handleDiagramChange(newData);
-                            }}
-                          >
-                            Add Edge
-                          </Button>
-                        </ButtonGroup>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <h3 style={{ margin: 0 }}>Interactive Diagram Canvas</h3>
+                        <Badge content={`${diagramData.nodes.length} nodes, ${diagramData.edges.length} connections`} />
                       </div>
                     }
                     bordered
