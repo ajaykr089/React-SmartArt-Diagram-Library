@@ -6,13 +6,15 @@ interface EdgeRendererProps {
   nodes: DiagramNode[];
   selectedEdge: DiagramEdge | null;
   onEdgeClick: (edge: DiagramEdge, event: React.MouseEvent) => void;
+  onEdgeContextMenu?: (edge: DiagramEdge, event: React.MouseEvent) => void;
 }
 
 export const EdgeRenderer: React.FC<EdgeRendererProps> = ({
   edges,
   nodes,
   selectedEdge,
-  onEdgeClick
+  onEdgeClick,
+  onEdgeContextMenu
 }) => {
   return (
     <g>
@@ -42,6 +44,13 @@ export const EdgeRenderer: React.FC<EdgeRendererProps> = ({
               markerEnd={edge.data.style?.arrowhead === 'arrow' ? 'url(#arrowhead)' : undefined}
               style={{ cursor: 'pointer' }}
               onClick={(e) => onEdgeClick(edge, e)}
+              onContextMenu={(e) => {
+                if (onEdgeContextMenu) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onEdgeContextMenu(edge, e);
+                }
+              }}
             />
             {edge.data.label && (
               <text

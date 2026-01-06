@@ -28,6 +28,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const [submenuVisible, setSubmenuVisible] = useState<string | null>(null);
+  const submenuTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -120,13 +121,20 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
           onClick={() => handleItemClick(item)}
           onMouseEnter={() => {
             if (hasSubmenu && !item.disabled) {
+              // Clear any existing timeout
+              if (submenuTimeoutRef.current) {
+                clearTimeout(submenuTimeoutRef.current);
+                submenuTimeoutRef.current = null;
+              }
               setSubmenuVisible(item.id);
             }
           }}
           onMouseLeave={() => {
             if (hasSubmenu) {
-              // Keep submenu visible for a short time to allow mouse movement
-              setTimeout(() => setSubmenuVisible(null), 100);
+              // Delay closing to allow mouse movement to submenu
+              submenuTimeoutRef.current = setTimeout(() => {
+                setSubmenuVisible(null);
+              }, 300); // Increased delay for better UX
             }
           }}
         >
@@ -155,6 +163,19 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
               minWidth: '160px',
               zIndex: 1000
             }}
+            onMouseEnter={() => {
+              // Clear timeout when entering submenu
+              if (submenuTimeoutRef.current) {
+                clearTimeout(submenuTimeoutRef.current);
+                submenuTimeoutRef.current = null;
+              }
+            }}
+            onMouseLeave={() => {
+              // Close submenu when leaving it
+              submenuTimeoutRef.current = setTimeout(() => {
+                setSubmenuVisible(null);
+              }, 300);
+            }}
           >
             {item.children!.map(child => renderMenuItem(child, depth + 1))}
           </div>
@@ -176,8 +197,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
         borderRadius: '4px',
         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
         minWidth: '160px',
-        zIndex: 1000,
-        overflow: 'hidden'
+        zIndex: 1000
       }}
     >
       {items.map(item => renderMenuItem(item))}
@@ -185,7 +205,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
   );
 };
 
-// Predefined context menu items for diagrams
+// Enhanced context menu items for diagrams
 export const createDiagramContextMenu = (
   actions: {
     addNode?: () => void;
@@ -196,25 +216,136 @@ export const createDiagramContextMenu = (
     bringToFront?: () => void;
     sendToBack?: () => void;
     properties?: () => void;
+    changeType?: (type: string) => void;
+    selectAll?: () => void;
+    clearSelection?: () => void;
+    zoomIn?: () => void;
+    zoomOut?: () => void;
+    fitToView?: () => void;
+    export?: () => void;
   },
   target?: DiagramNode | DiagramEdge | null
 ): ContextMenuItem[] => {
   const items: ContextMenuItem[] = [];
 
-  // Add actions
-  if (actions.addNode) {
+  // Canvas actions (when no target)
+  if (!target) {
+    // Creation actions
     items.push({
       id: 'add-node',
       label: 'Add Node',
       icon: '➕',
       onClick: actions.addNode
     });
-  }
 
-  // Target-specific actions
-  if (target) {
+    if (actions.paste) {
+      items.push({
+        id: 'paste',
+        label: 'Paste',
+        icon: '📋',
+        onClick: actions.paste
+      });
+    }
+
     items.push({ id: 'separator-1', label: '', separator: true });
 
+    // Selection actions
+    if (actions.selectAll) {
+      items.push({
+        id: 'select-all',
+        label: 'Select All',
+        icon: '☑️',
+        onClick: actions.selectAll
+      });
+    }
+
+    if (actions.clearSelection) {
+      items.push({
+        id: 'clear-selection',
+        label: 'Clear Selection',
+        icon: '☐',
+        onClick: actions.clearSelection
+      });
+    }
+
+    items.push({ id: 'separator-2', label: '', separator: true });
+
+    // View actions
+    const viewItems: ContextMenuItem[] = [];
+
+    if (actions.zoomIn) {
+      viewItems.push({
+        id: 'zoom-in',
+        label: 'Zoom In',
+        icon: '🔍➕',
+        onClick: actions.zoomIn
+      });
+    }
+
+    if (actions.zoomOut) {
+      viewItems.push({
+        id: 'zoom-out',
+        label: 'Zoom Out',
+        icon: '🔍➖',
+        onClick: actions.zoomOut
+      });
+    }
+
+    if (actions.fitToView) {
+      viewItems.push({
+        id: 'fit-to-view',
+        label: 'Fit to View',
+        icon: '📐',
+        onClick: actions.fitToView
+      });
+    }
+
+    // Add Reset Zoom for canvas
+    viewItems.push({
+      id: 'reset-zoom',
+      label: 'Reset Zoom',
+      icon: '🔄',
+      onClick: () => {
+        // Reset zoom to 1 (100%)
+        console.log('Reset zoom to 100%');
+      }
+    });
+
+    // Add Center View for canvas
+    viewItems.push({
+      id: 'center-view',
+      label: 'Center View',
+      icon: '🎯',
+      onClick: () => {
+        // Center the view
+        console.log('Center view');
+      }
+    });
+
+    if (viewItems.length > 0) {
+      items.push({
+        id: 'view',
+        label: 'View',
+        icon: '👁️',
+        children: viewItems
+      });
+    }
+
+    // Export actions
+    if (actions.export) {
+      items.push({ id: 'separator-3', label: '', separator: true });
+      items.push({
+        id: 'export',
+        label: 'Export',
+        icon: '💾',
+        onClick: actions.export
+      });
+    }
+  } else if (target && 'type' in target) {
+    // Node-specific actions
+    const node = target as DiagramNode;
+
+    // Edit actions
     if (actions.copy) {
       items.push({
         id: 'copy',
@@ -233,6 +364,199 @@ export const createDiagramContextMenu = (
       });
     }
 
+    if (actions.paste) {
+      items.push({
+        id: 'paste',
+        label: 'Paste',
+        icon: '📋',
+        onClick: actions.paste
+      });
+    }
+
+    items.push({ id: 'separator-1', label: '', separator: true });
+
+    // View actions for nodes
+    const viewItems: ContextMenuItem[] = [];
+
+    if (actions.zoomIn) {
+      viewItems.push({
+        id: 'zoom-in',
+        label: 'Zoom In',
+        icon: '🔍➕',
+        onClick: actions.zoomIn
+      });
+    }
+
+    if (actions.zoomOut) {
+      viewItems.push({
+        id: 'zoom-out',
+        label: 'Zoom Out',
+        icon: '🔍➖',
+        onClick: actions.zoomOut
+      });
+    }
+
+    if (actions.fitToView) {
+      viewItems.push({
+        id: 'fit-to-view',
+        label: 'Fit to View',
+        icon: '📐',
+        onClick: actions.fitToView
+      });
+    }
+
+    // Add Reset Zoom for nodes
+    viewItems.push({
+      id: 'reset-zoom',
+      label: 'Reset Zoom',
+      icon: '🔄',
+      onClick: () => {
+        // Reset zoom to 1 (100%)
+        if (actions.zoomIn && actions.zoomOut) {
+          // This is a simple implementation - in a real app you'd have a resetZoom action
+          console.log('Reset zoom to 100%');
+        }
+      }
+    });
+
+    // Add Center View for nodes
+    viewItems.push({
+      id: 'center-view',
+      label: 'Center View',
+      icon: '🎯',
+      onClick: () => {
+        // Center the view on this node
+        console.log('Center view on node');
+      }
+    });
+
+    if (viewItems.length > 0) {
+      items.push({
+        id: 'view',
+        label: 'View',
+        icon: '👁️',
+        children: viewItems
+      });
+    }
+
+    items.push({ id: 'separator-2', label: '', separator: true });
+
+    // Layer actions
+    const layerItems: ContextMenuItem[] = [];
+
+    if (actions.bringToFront) {
+      layerItems.push({
+        id: 'bring-to-front',
+        label: 'Bring to Front',
+        icon: '⬆️',
+        onClick: actions.bringToFront
+      });
+    }
+
+    if (actions.sendToBack) {
+      layerItems.push({
+        id: 'send-to-back',
+        label: 'Send to Back',
+        icon: '⬇️',
+        onClick: actions.sendToBack
+      });
+    }
+
+    if (layerItems.length > 0) {
+      items.push({
+        id: 'layer',
+        label: 'Layer',
+        icon: '📚',
+        children: layerItems
+      });
+    }
+
+    // Shape change actions
+    if (actions.changeType) {
+      const shapeItems: ContextMenuItem[] = [
+        { id: 'rectangle', label: 'Rectangle', icon: '▭', onClick: () => actions.changeType!('rectangle') },
+        { id: 'circle', label: 'Circle', icon: '○', onClick: () => actions.changeType!('circle') },
+        { id: 'diamond', label: 'Diamond', icon: '◆', onClick: () => actions.changeType!('diamond') },
+        { id: 'triangle', label: 'Triangle', icon: '△', onClick: () => actions.changeType!('triangle') },
+        { id: 'hexagon', label: 'Hexagon', icon: '⬡', onClick: () => actions.changeType!('hexagon') },
+        { id: 'star', label: 'Star', icon: '⭐', onClick: () => actions.changeType!('star') }
+      ];
+
+      items.push({
+        id: 'change-shape',
+        label: 'Change Shape',
+        icon: '🎭',
+        children: shapeItems
+      });
+    }
+
+    // Delete action
+    if (actions.delete) {
+      items.push({ id: 'separator-3', label: '', separator: true });
+      items.push({
+        id: 'delete',
+        label: 'Delete',
+        icon: '🗑️',
+        onClick: actions.delete
+      });
+    }
+
+    // Properties
+    if (actions.properties) {
+      items.push({ id: 'separator-4', label: '', separator: true });
+      items.push({
+        id: 'properties',
+        label: 'Properties',
+        icon: '⚙️',
+        onClick: actions.properties
+      });
+    }
+  } else if (target && 'source' in target) {
+    // Edge-specific actions
+    const edge = target as DiagramEdge;
+
+    // View actions for edges
+    const viewItems: ContextMenuItem[] = [];
+
+    if (actions.zoomIn) {
+      viewItems.push({
+        id: 'zoom-in',
+        label: 'Zoom In',
+        icon: '🔍➕',
+        onClick: actions.zoomIn
+      });
+    }
+
+    if (actions.zoomOut) {
+      viewItems.push({
+        id: 'zoom-out',
+        label: 'Zoom Out',
+        icon: '🔍➖',
+        onClick: actions.zoomOut
+      });
+    }
+
+    if (actions.fitToView) {
+      viewItems.push({
+        id: 'fit-to-view',
+        label: 'Fit to View',
+        icon: '📐',
+        onClick: actions.fitToView
+      });
+    }
+
+    if (viewItems.length > 0) {
+      items.push({
+        id: 'view',
+        label: 'View',
+        icon: '👁️',
+        children: viewItems
+      });
+    }
+
+    items.push({ id: 'separator-1', label: '', separator: true });
+
+    // Edit actions
     if (actions.delete) {
       items.push({
         id: 'delete',
@@ -242,45 +566,14 @@ export const createDiagramContextMenu = (
       });
     }
 
-    // Layer actions
-    items.push({ id: 'separator-2', label: '', separator: true });
-
-    if (actions.bringToFront) {
-      items.push({
-        id: 'bring-to-front',
-        label: 'Bring to Front',
-        icon: '⬆️',
-        onClick: actions.bringToFront
-      });
-    }
-
-    if (actions.sendToBack) {
-      items.push({
-        id: 'send-to-back',
-        label: 'Send to Back',
-        icon: '⬇️',
-        onClick: actions.sendToBack
-      });
-    }
-
     // Properties
     if (actions.properties) {
-      items.push({ id: 'separator-3', label: '', separator: true });
+      items.push({ id: 'separator-2', label: '', separator: true });
       items.push({
         id: 'properties',
         label: 'Properties',
         icon: '⚙️',
         onClick: actions.properties
-      });
-    }
-  } else {
-    // Canvas actions
-    if (actions.paste) {
-      items.push({
-        id: 'paste',
-        label: 'Paste',
-        icon: '📋',
-        onClick: actions.paste
       });
     }
   }
